@@ -26,11 +26,7 @@ use App\Models\Product;
 Route::get('/', function () {
     return redirect()->route('login');
 });
-
-// --- RUTAS PROTEGIDAS (AUTH) ---
-Route::middleware(['auth', 'verified'])->group(function () {
-
-    Route::get('/reparar-storage', function () {
+Route::get('/reparar-storage', function () {
     try {
         // 1. Ejecutar el comando para crear el enlace simbólico
         \Illuminate\Support\Facades\Artisan::call('storage:link');
@@ -40,6 +36,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return "Ocurrió un error: " . $e->getMessage();
     }
 });
+
+// --- RUTAS PROTEGIDAS (AUTH) ---
+Route::middleware(['auth', 'verified'])->group(function () {
+
 
 // 1. DASHBOARD (Acceso: TODOS)
 Route::get('/dashboard', function () {
