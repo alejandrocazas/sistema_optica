@@ -13,7 +13,6 @@
                 <div class="mb-8 text-center">
                     <div class="relative inline-block group">
                         <div class="mt-2">
-                            {{-- CORRECCIÓN 1: Usamos 'asset' y un ID para la previsualización --}}
                             <img id="preview-image" 
                                  class="h-32 w-32 rounded-full object-cover mx-auto shadow-lg border-4 border-white dark:border-gray-700" 
                                  src="{{ $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&color=7F9CF5&background=EBF4FF' }}" 
@@ -24,7 +23,6 @@
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
                             </svg>
-                            {{-- CORRECCIÓN 2: Agregamos evento onchange para previsualizar --}}
                             <input type="file" name="photo" class="hidden" onchange="previewFile(this)" accept="image/*" />
                         </label>
                     </div>
@@ -71,7 +69,18 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end border-t dark:border-gray-700 pt-6">
+                {{-- BOTONES DE ACCIÓN --}}
+                <div class="flex justify-end items-center gap-4 border-t dark:border-gray-700 pt-6">
+                    
+                    {{-- 1. BOTÓN CANCELAR (Gris, lleva al Dashboard) --}}
+                    <a href="{{ route('dashboard') }}" class="bg-gray-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-gray-600 shadow-md transform transition hover:-translate-y-1 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                        Cancelar
+                    </a>
+
+                    {{-- 2. BOTÓN GUARDAR (Azul, envía el formulario) --}}
                     <button type="submit" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 shadow-lg transform transition hover:-translate-y-1 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
                         Guardar Cambios
@@ -81,7 +90,7 @@
         </div>
     </div>
 
-    {{-- Script para previsualizar la imagen antes de subirla --}}
+    {{-- Script para previsualizar --}}
     <script>
         function previewFile(input) {
             var file = input.files[0];
