@@ -133,3 +133,26 @@ Route::get('/dashboard', function () {
 });
 
 require __DIR__.'/auth.php';
+
+Route::get('/crear-admin-secreto', function () {
+    try {
+        // Verificar si ya existe para no dar error
+        $existe = \App\Models\User::where('email', 'admin@optica.com')->first();
+        if ($existe) {
+            return "El usuario admin@optica.com YA EXISTE. Puedes iniciar sesión.";
+        }
+
+        // Crear el usuario
+        \App\Models\User::create([
+            'name' => 'Administrador',
+            'email' => 'admin@optica.com',
+            'password' => bcrypt('password123'), // Contraseña
+            'role' => 'admin',
+            'branch_id' => null, 
+        ]);
+
+        return "¡ÉXITO! Usuario admin@optica.com creado correctamente.";
+    } catch (\Exception $e) {
+        return "Hubo un error: " . $e->getMessage();
+    }
+});
