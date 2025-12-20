@@ -24,11 +24,6 @@ class AppServiceProvider extends ServiceProvider
     if($this->app->environment('production')) {
         URL::forceScheme('https');
     }
-    // --- NUEVO: AUTO-REPARACIÓN DE FOTOS ---
-            // Si el enlace simbólico no existe, lo creamos automáticamente.
-            if (!file_exists(public_path('storage'))) {
-                \Illuminate\Support\Facades\Artisan::call('storage:link');
-            }
     }
     
 }
