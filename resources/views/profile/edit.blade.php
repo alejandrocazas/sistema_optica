@@ -3,6 +3,8 @@
         <h1 class="text-3xl font-bold text-gray-800 dark:text-white mb-8">Mi Perfil</h1>
 
         <div class="bg-white dark:bg-gray-800 shadow-lg overflow-hidden sm:rounded-lg p-8 border-t-4 border-blue-600 dark:border-blue-500 transition-colors">
+            
+            {{-- Formulario Único --}}
             <form method="POST" action="{{ route('profile.update') }}" enctype="multipart/form-data">
                 @csrf
                 @method('PATCH')
@@ -11,19 +13,19 @@
                 <div class="mb-8 text-center">
                     <div class="relative inline-block group">
                         <div class="mt-2">
-                            @if($user->profile_photo_path)
-                                <img class="h-32 w-32 rounded-full object-cover mx-auto shadow-lg border-4 border-white dark:border-gray-700" src="{{ Storage::url($user->profile_photo_path) }}" alt="{{ $user->name }}">
-                            @else
-                                <img class="h-32 w-32 rounded-full mx-auto shadow-lg border-4 border-white dark:border-gray-700" src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&color=7F9CF5&background=EBF4FF" alt="{{ $user->name }}">
-                            @endif
+                            {{-- CORRECCIÓN 1: Usamos 'asset' y un ID para la previsualización --}}
+                            <img id="preview-image" 
+                                 class="h-32 w-32 rounded-full object-cover mx-auto shadow-lg border-4 border-white dark:border-gray-700" 
+                                 src="{{ $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : 'https://ui-avatars.com/api/?name='.urlencode($user->name).'&color=7F9CF5&background=EBF4FF' }}" 
+                                 alt="{{ $user->name }}">
                         </div>
                         
-                        {{-- Botón superpuesto (Opcional) --}}
                         <label class="absolute bottom-0 right-0 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-md cursor-pointer transition transform hover:scale-110">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
                             </svg>
-                            <input type="file" name="photo" class="hidden" onchange="form.submit()"/> {{-- Truco: enviar al seleccionar, o quita el onchange si prefieres el botón guardar --}}
+                            {{-- CORRECCIÓN 2: Agregamos evento onchange para previsualizar --}}
+                            <input type="file" name="photo" class="hidden" onchange="previewFile(this)" accept="image/*" />
                         </label>
                     </div>
                     @error('photo') <p class="text-red-500 text-xs mt-2">{{ $message }}</p> @enderror
@@ -78,4 +80,19 @@
             </form>
         </div>
     </div>
+
+    {{-- Script para previsualizar la imagen antes de subirla --}}
+    <script>
+        function previewFile(input) {
+            var file = input.files[0];
+            if(file){
+                var reader = new FileReader();
+                reader.onload = function(){
+                    var output = document.getElementById('preview-image');
+                    output.src = reader.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
 </x-app>
