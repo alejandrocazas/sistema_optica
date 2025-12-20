@@ -30,6 +30,17 @@ Route::get('/', function () {
 // --- RUTAS PROTEGIDAS (AUTH) ---
 Route::middleware(['auth', 'verified'])->group(function () {
 
+    Route::get('/reparar-storage', function () {
+    try {
+        // 1. Ejecutar el comando para crear el enlace simbólico
+        \Illuminate\Support\Facades\Artisan::call('storage:link');
+        
+        return "¡LISTO! El enlace simbólico se ha creado correctamente. Ya puedes subir fotos.";
+    } catch (\Exception $e) {
+        return "Ocurrió un error: " . $e->getMessage();
+    }
+});
+
 // 1. DASHBOARD (Acceso: TODOS)
 Route::get('/dashboard', function () {
     
