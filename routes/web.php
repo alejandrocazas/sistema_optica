@@ -26,29 +26,6 @@ use App\Models\Product;
 Route::get('/', function () {
     return redirect()->route('login');
 });
-// --- RUTA SECRETA MEJORADA (REPARA LA BD Y CREA EL ADMIN) ---
-Route::get('/crear-admin-secreto', function () {
-    try {
-        // PASO 1: REPARAR LA BASE DE DATOS
-        // Esto borra las tablas viejas y crea las nuevas con las columnas 'role' y 'branch_id'
-        \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
-            '--force' => true // Necesario para ejecutarlo en producción
-        ]);
-
-        // PASO 2: CREAR EL USUARIO
-        \App\Models\User::create([
-            'name' => 'Administrador',
-            'email' => 'admin@optica.com',
-            'password' => bcrypt('password123'),
-            'role' => 'admin',
-            'branch_id' => null, 
-        ]);
-
-        return "¡ÉXITO TOTAL! Base de datos reparada y Usuario creado. Ya puedes iniciar sesión.";
-    } catch (\Exception $e) {
-        return "Hubo un error: " . $e->getMessage();
-    }
-});
 
 // --- RUTAS PROTEGIDAS (AUTH) ---
 Route::middleware(['auth', 'verified'])->group(function () {
