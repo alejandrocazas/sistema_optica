@@ -26,6 +26,56 @@ use App\Models\Product;
 Route::get('/', function () {
     return redirect()->route('login');
 });
+Route::get('/debug-storage', function () {
+    $target = storage_path('app/public');
+    $link = public_path('storage');
+
+    echo "<h1>🛠️ Diagnóstico y Reparación de Storage</h1>";
+
+    // 1. Verificar si la carpeta real existe (Donde se guardan las fotos)
+    echo "<h3>1. Verificando Volumen Real</h3>";
+    if (is_dir($target)) {
+        echo "✅ La carpeta de origen existe: <code>$target</code><br>";
+        
+        // Listar archivos para ver si la foto está ahí
+        $files = scandir($target . '/profile-photos');
+        echo "📸 <b>Fotos encontradas en el disco:</b><br><ul>";
+        foreach ($files as $file) {
+            if ($file != '.' && $file != '..') echo "<li>$file</li>";
+        }
+        echo "</ul>";
+    } else {
+        echo "❌ ERROR CRÍTICO: La carpeta de origen NO existe. El Volumen no está bien montado.<br>";
+    }
+
+    // 2. Verificar el Enlace (El puente)
+    echo "<h3>2. Verificando Enlace Simbólico (public/storage)</h3>";
+    if (file_exists($link)) {
+        if (is_link($link)) {
+            echo "✅ El enlace YA existe y apunta a: <code>" . readlink($link) . "</code><br>";
+        } else {
+            echo "❌ PROBLEMA DETECTADO: 'public/storage' es una <b>CARPETA REAL</b>, no un enlace. <br>";
+            echo "🗑️ Intentando eliminar la carpeta estorbo... ";
+            // Intentar borrar la carpeta vacía para poder crear el link
+            @rmdir($link); 
+            if (!file_exists($link)) { echo "¡Eliminada con éxito!<br>"; } 
+            else { echo "Falló la eliminación (quizás tiene archivos dentro).<br>"; }
+        }
+    } else {
+        echo "⚠️ El enlace no existe (Está limpio).<br>";
+    }
+
+    // 3. Regenerar el enlace a la fuerza
+    echo "<h3>3. Regenerando Enlace...</h3>";
+    try {
+        \Illuminate\Support\Facades\Artisan::call('storage:link');
+        echo "✅ Comando ejecutado: " . \Illuminate\Support\Facades\Artisan::output();
+    } catch (\Exception $e) {
+        echo "❌ Error al ejecutar comando: " . $e->getMessage();
+    }
+
+    return "<br><br><a href='/'>Volver al Inicio</a>";
+});
 // --- RUTAS PROTEGIDAS (AUTH) ---
 Route::middleware(['auth', 'verified'])->group(function () {
 
