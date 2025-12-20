@@ -129,12 +129,7 @@ Route::get('/dashboard', function () {
         Route::get('/reportes', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reportes/pdf', [ReportController::class, 'pdf'])->name('reports.pdf');
     });
-
-});
-
-require __DIR__.'/auth.php';
-
-Route::get('/crear-admin-secreto', function () {
+    Route::get('/crear-admin-secreto', function () {
     try {
         // Verificar si ya existe para no dar error
         $existe = \App\Models\User::where('email', 'admin@optica.com')->first();
@@ -156,3 +151,9 @@ Route::get('/crear-admin-secreto', function () {
         return "Hubo un error: " . $e->getMessage();
     }
 });
+
+});
+
+
+require __DIR__.'/auth.php';
+
