@@ -15,6 +15,9 @@
 
         <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
+            
+            {{-- TRUCO: Enviamos stock 0 oculto para que la base de datos no falle si el campo es obligatorio --}}
+            <input type="hidden" name="stock" value="0">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 
@@ -49,15 +52,8 @@
                         <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Lote</label>
                         <input type="text" name="batch" class="w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Opcional">
                     </div>
-
-                    <div>
-                        <label class="font-bold text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
-                            Stock Inicial
-                            <span class="text-xs font-normal text-blue-500 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded">Solo al crear</span>
-                        </label>
-                        <input type="number" name="stock" class="w-full border p-2 rounded dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none" placeholder="0" required>
-                        <p class="text-[10px] text-gray-400 mt-1">* Para agregar más stock en el futuro, usa el módulo de "Compras".</p>
-                    </div>
+                    
+                    {{-- NOTA: Se eliminó el campo Stock Inicial visualmente --}}
                 </div>
 
                 {{-- COLUMNA DERECHA --}}
@@ -79,21 +75,32 @@
                             <label class="block font-bold mb-1 text-xs uppercase text-green-600 dark:text-green-400">Precio Venta</label>
                             <div class="relative">
                                 <span class="absolute left-3 top-2 text-gray-500">Bs</span>
-                                <input type="number" step="0.01" name="price_sell" class="w-full pl-8 p-2 border rounded dark:bg-gray-700 dark:border-gray-600  font-bold text-green-700 dark:text-green-300 focus:ring-2 focus:ring-green-500 outline-none" placeholder="0.00" required>
+                                <input type="number" step="0.01" name="price_sell" class="w-full pl-8 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 font-bold text-green-700 dark:text-green-300 focus:ring-2 focus:ring-green-500 outline-none" placeholder="0.00" required>
                             </div>
                         </div>
                     </div>
 
-                    {{-- SUBIDA DE IMAGEN --}}
-                    <div class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition">
-                        <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <label class="cursor-pointer">
-                            <span class="text-blue-600 dark:text-blue-400 font-bold hover:underline">Sube una foto</span>
-                            <span class="text-gray-500 dark:text-gray-400"> o arrastra aquí</span>
-                            <input type="file" name="image" class="hidden">
-                        </label>
-                        <p class="text-xs text-gray-400 mt-1">PNG, JPG hasta 2MB</p>
+                    {{-- SUBIDA DE IMAGEN CON PREVIEW --}}
+                    <div>
+                        <label class="block font-bold text-gray-700 dark:text-gray-300 mb-1">Imagen del Producto</label>
+                        
+                        <div class="relative border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg h-48 flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition overflow-hidden group">
+                            
+                            {{-- Contenido por defecto (Icono y Texto) --}}
+                            <div id="upload-placeholder" class="flex flex-col items-center pointer-events-none">
+                                <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <p class="text-blue-600 dark:text-blue-400 font-bold">Sube una foto</p>
+                                <p class="text-xs text-gray-400 mt-1">PNG, JPG hasta 2MB</p>
+                            </div>
+
+                            {{-- Imagen de Previsualización (Oculta al inicio) --}}
+                            <img id="image-preview" class="hidden absolute inset-0 w-full h-full object-contain bg-white dark:bg-gray-800" />
+
+                            {{-- Input invisible que cubre todo el área --}}
+                            <input type="file" name="image" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewImage(this)" accept="image/*">
+                        </div>
                     </div>
+
                 </div>
             </div>
 
@@ -107,4 +114,24 @@
             </div>
         </form>
     </div>
+
+    {{-- Script para manejar la previsualización --}}
+    <script>
+        function previewImage(input) {
+            const preview = document.getElementById('image-preview');
+            const placeholder = document.getElementById('upload-placeholder');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden'); // Muestra la imagen
+                    placeholder.classList.add('hidden'); // Oculta el texto de "Subir foto"
+                }
+                
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 </x-app>
