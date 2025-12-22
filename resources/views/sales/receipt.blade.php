@@ -15,8 +15,9 @@
         }
         
         .header { text-align: center; margin-bottom: 5px; }
-        .company { font-size: 12px; font-weight: bold; }
-        .sub-header { font-size: 9px; margin-top: 2px; }
+        /* Aumentamos un poco la fuente del nombre para que destaque la sucursal */
+        .company { font-size: 13px; font-weight: bold; text-transform: uppercase; line-height: 1.2; }
+        .sub-header { font-size: 9px; margin-top: 2px; text-transform: uppercase;}
         
         .title { 
             text-align: center; 
@@ -69,10 +70,25 @@
 <body>
 
     <div class="header">
-        <div class="company">ÓPTICA ALFA ORURO</div>
+        {{-- CAMBIO 1: Nombre Dinámico de la Sucursal --}}
+        <div class="company">
+            ÓPTICA ALFA<br>
+            {{-- Usamos ?? '' para evitar errores si la sucursal fue borrada --}}
+            SUCURSAL: {{ $sale->branch->name ?? 'CENTRAL' }}
+        </div>
+        
         <div class="sub-header">DE: JUAN PÉREZ (PROPIETARIO)</div>
-        <div class="sub-header">CALLE BOLÍVAR #123 - ORURO</div>
-        <div class="sub-header">Celular: 9999999 - 9999999</div>
+        
+        {{-- CAMBIO 2: Dirección Dinámica de la Sucursal (Si la tabla branches tiene columna address) --}}
+        {{-- Si no tienes columna address, puedes dejar la fija o usar un if --}}
+        <div class="sub-header">
+            {{ $sale->branch->address ?? 'CALLE BOLÍVAR #123 - ORURO' }}
+        </div>
+
+        {{-- CAMBIO 3: Teléfono Dinámico --}}
+        <div class="sub-header">
+            Telf: {{ $sale->branch->phone ?? '9999999' }}
+        </div>
     </div>
 
     <div class="title"> NOTA DE VENTA </div>
@@ -96,7 +112,7 @@
             <td>{{ $sale->created_at->format('d/m/Y H:i') }}</td>
         </tr>
         
-        {{-- NUEVA SECCIÓN: FECHA DE ENTREGA --}}
+        {{-- FECHA DE ENTREGA --}}
         @if($sale->delivery_date)
         <tr>
             <td class="label" style="padding-top: 3px;">ENTREGA:</td>
@@ -159,7 +175,7 @@
 
     <div class="dashed"></div>
 
-    {{-- NUEVA SECCIÓN: AVISO FISCAL --}}
+    {{-- AVISO FISCAL --}}
     <div class="fiscal-warning">
         "NO ES VÁLIDO PARA CRÉDITO FISCAL"
     </div>

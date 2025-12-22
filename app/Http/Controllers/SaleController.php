@@ -31,7 +31,8 @@ public function index() {
 
 public function print($id)
 {
-    $sale = Sale::with(['details.product', 'patient', 'user'])->findOrFail($id);
+    
+    $sale = Sale::with(['details.product', 'patient', 'user', 'branch'])->findOrFail($id);
 
     // Generamos el QR con la URL pública de la venta o datos clave
     // Ejemplo: "Venta #123 | Total: 500 | Fecha: ..."
